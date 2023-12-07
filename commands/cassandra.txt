@@ -1,0 +1,23 @@
+docker exec -it 8265702da746(ID/name) cqlsh
+
+CREATE KEYSPACE IF NOT EXISTS stock_data
+  WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+
+USE stock_data;
+
+CREATE TABLE IF NOT EXISTS stock_prices (
+    date DATE PRIMARY KEY,
+    open DOUBLE,
+    high DOUBLE,
+    low DOUBLE,
+    close DOUBLE,
+    adj_close DOUBLE,
+    volume BIGINT
+);
+
+select * from stock_prices;
+
+
+docker exec -it cassandra /bin/bash
+nodetool status -> tim host
+

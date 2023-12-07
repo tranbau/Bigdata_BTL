@@ -4,17 +4,25 @@ from time import sleep
 import pandas as pd
 import json
 import sys
+import os
 
-data_path = '../../data/data.csv'
-df = pd.read_csv(data_path)
+topic = "data"
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Path to the CSV file relative to the script's directory
+csv_file_path = os.path.join(script_dir, 'data.csv')
+
+# Read the CSV file using pandas
+df = pd.read_csv(csv_file_path)
 
 producer = Producer({'bootstrap.servers': 'localhost:9092'})
 try:
     for index, row in df.iterrows():
         dict_stock = row.to_dict()
         json_data = json.dumps(dict_stock).encode("utf-8")
-        producer.produce('batch', value=json_data)
-        sleep(5)
+        producer.produce(topic, value=json_data)
+        sleep(1)
 
 except KeyboardInterrupt:
     sys.stderr.write('%% Aborted by user\n')

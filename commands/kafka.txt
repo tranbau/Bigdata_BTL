@@ -1,0 +1,8 @@
+docker exec -it kafka /bin/sh
+cd opt/kafka_2.13-2.8.1/bin
+kafka-topics.sh --bootstrap-server localhost:9092 --topic data  --create  --partitions 2 
+
+
+kafka-topics.sh  --topic data --bootstrap-server localhost:9092 --delete
+kafka-topics.sh -
+bootstrap-server localhost:9092 --list

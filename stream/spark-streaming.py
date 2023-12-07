@@ -14,77 +14,73 @@ import pyspark.sql.functions as F
 spark = SparkSession \
     .builder \
     .appName("Streaming from Kafka") \
+    .config("spark.streaming.stopGracefullyOnShutdown", True) \
+    .config('spark.jars.packages', 'org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0') \
     .master("local[*]") \
     .getOrCreate()
 spark.sparkContext.setLogLevel("WARN")
-
-topic_streaming = "stream-data"
+topic = "data"
 
 # 2. Data stream from kakfa
-# data_stream = spark \
-#     .readStream \
-#     .format("kafka") \
-#     .option("kafka.bootstrap.servers", "localhost:9092") \
-#     .option("subscribe", stream) \
-#     .option("startingOffsets", "earliest") \
-#     .load()
-
 data_stream = spark \
     .readStream \
-    .format("socket") \
-    .option("host", "localhost") \
-    .option("port", 9091) \
+    .format("kafka") \
+    .option("kafka.bootstrap.servers", "localhost:9092") \
+    .option("subscribe", topic) \
+    .option("startingOffsets", "latest") \
     .load()
+
 data_json_schema = StructType([
     StructField("stockName", StringType(), True),
+    StructField("tradeType", StringType(), True),
     StructField("price", DoubleType(), True),
+    StructField("quantity", LongType(), True),
     StructField("timestamp", TimestampType(), True),
 ])
 data_stream = data_stream.selectExpr("cast(value as string) as value")
 data_stream = data_stream.withColumn("value", from_json(
     data_stream["value"], data_json_schema)).select("value.*")
 data_stream = data_stream.withColumn("timestamp", to_timestamp(
-    data_stream["timestamp"], "HH:mm:ss")).withWatermark("timestamp", "1 second")
-
+    data_stream["timestamp"], "HH:mm:ss")).withWatermark("timestamp", "1 day")
 
 
 # 3. Config stream from socket
-rule_stream = spark \
+configs_stream = spark \
     .readStream \
     .format("socket") \
     .option("host", "localhost") \
     .option("port", 9090) \
     .load()
-
-rule_json_schema = StructType([
+configs_json_schema = StructType([
     StructField("stockNameRule", StringType()),
+    StructField("tradeTypeRule", StringType(), True),
     StructField("priceRule", DoubleType()),
+    StructField("quantityRule", LongType(), True),
     StructField("timestampRule", TimestampType(), True),
 ])
-rule_stream = rule_stream.selectExpr("cast(value as string) as value")
-rule_stream = rule_stream \
-    .select(from_json("value", rule_json_schema).alias("data")) \
+configs_stream = configs_stream \
+    .select(from_json("value", configs_json_schema).alias("data")) \
     .select("data.*")
+configs_stream = configs_stream.withWatermark("timestampRule", "1 second")
 
-# {"stockName": "a", "price": 21} {"stockNameRule": "a", "priceRule": 10}
+# 4. Join stream-stream
+join_stream = data_stream.join(
+    configs_stream,
+    expr("""
+         stockName = stockNameRule AND
+         price >= priceRule
+         """)
+)
 
 # 5. Handle join stream
-def processEachDataRow(row):
-    print(row)
-def processEachRuleRow(row):
-    print(row)
-
-queryData = data_stream  \
+query = join_stream  \
     .writeStream \
-    .foreach(processEachDataRow) \
+    .format("console")\
+    .outputMode("append") \
     .start()
 
-queryRule = rule_stream \
-    .writeStream \
-    .foreach(processEachRuleRow) \
-    .start()
-
-spark.streams.awaitAnyTermination()
+# spark.streams.awaitAnyTermination()
+query.awaitTermination()
 
 # use built-in smtp server debugger: python -m smtpd -c DebuggingServer -n localhost:1025
 # send email to alert user
