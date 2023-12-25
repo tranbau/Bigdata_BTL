@@ -34,8 +34,8 @@ def auto_commit_consume(consumer, topics):
 
         while True:
             msg = consumer.poll(timeout=1.0)
-            if msg is None: continue
-
+            if msg is None: 
+                continue
             if msg.error():
                 if msg.error().code() == KafkaError._PARTITION_EOF:
                     # End of partition 
@@ -112,23 +112,26 @@ def asyn_commit_consume(consumer, topics):
         sys.stderr.write('%% Aborted by user\n')
     finally:
         consumer.close()
-
+            
 if __name__ == '__main__':
     topics = ["data"]
     config = {
-        'bootstrap.servers': 'localhost:9092',
+        'bootstrap.servers': 'localhost:8097',
         'group.id': 'batch',
         'auto.offset.reset': 'earliest',
         'enable.auto.commit': True,
     }    
     # To handle with asyn commit
     # config = {
-    #     'bootstrap.servers': 'localhost:9092',
+    #     'bootstrap.servers': 'localhost:8097',
     #     'group.id': 'batch',
     #     'auto.offset.reset': 'earliest',
     #     'enable.auto.commit': False,
     #     'on_commit': commit_completed
     # }
-    consumer = Consumer(config)
-    auto_commit_consume(consumer=consumer, topics=topics)
+    try:
+        consumer = Consumer(config)
+        auto_commit_consume(consumer=consumer, topics=topics)
+    except Exception as e:
+        print("Error:", e)
     

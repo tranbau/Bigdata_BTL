@@ -1,0 +1,1 @@
+docker cp spark-cassandra-connector_2.12-3.4.1.jar zeppelin:opt/zeppelin/interpreter/spark/dep/spark-cassandra-connector_2.12-3.4.1.jar
