@@ -11,7 +11,10 @@ query = """
         INSERT INTO stock_prices (date, open, high, low, close, adj_close, volume)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
-        
+
+# Mongo connnect
+
+ 
 def msg_process(msg):
     record = json.loads(msg.value())
     metadata = {

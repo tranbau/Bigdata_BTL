@@ -1216,7 +1216,7 @@
           "type": "textarea"
         }
       },
-      "status": "READY",
+      "status": "DOWNLOADING_DEPENDENCIES",
       "interpreterGroup": [
         {
           "name": "spark",
@@ -1309,7 +1309,7 @@
       ],
       "dependencies": [
         {
-          "groupArtifactVersion": "/opt/zeppelin/interpreter/spark/dep/spark-cassandra-connector_2.12-3.2.0.jar",
+          "groupArtifactVersion": "/opt/zeppelin/interpreter/spark/dep/postgresql-42.7.1.jar",
           "local": false
         }
       ],

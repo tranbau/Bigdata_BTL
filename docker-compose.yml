@@ -103,19 +103,16 @@ services:
       - kafka1
       - kafka2
       - zookeeper     
-  cassandra:
-    image: cassandra:3.11.3
-    container_name: cassandra
-    ports:
-      - 9042:9042   
 
-  mongo:
-    image: mongo:latest
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
+  postgres:
+    image: postgres:14-alpine
+    container_name: postgres
     ports:
-      - 27017:27017
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=user
+      - POSTGRES_DB=stock
 
 volumes:
     spark_volume:

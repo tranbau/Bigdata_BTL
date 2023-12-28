@@ -1,1 +1,3 @@
-docker cp spark-cassandra-connector_2.12-3.4.1.jar zeppelin:opt/zeppelin/interpreter/spark/dep/spark-cassandra-connector_2.12-3.4.1.jar
+
+docker cp postgresql-42.7.1.jar zeppelin:opt/zeppelin/interpreter/spark/dep/postgresql-42.7.1.jar
+

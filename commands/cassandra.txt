@@ -1,5 +1,0 @@
-
-docker exec -it cassandra /bin/bash
-nodetool status -> tim host
--> thay đổi trong interpret của zeppline
-
