@@ -1,7 +1,11 @@
 # Bài tập lớn bigdata
 Lưu trữ và xử lí dữ liệu chứng khoán
-### Cài Đặt
+### Yêu Cầu
+#### Docker
+#### NodeJS
+#### Python
 
+### Cài Đặt
 1. **Clone dự án từ repository:**
     ```sh
     git clone https://github.com/yourusername/yourproject.git](https://github.com/tranbau/Bigdata_BTL.git
@@ -53,9 +57,6 @@ Lưu trữ và xử lí dữ liệu chứng khoán
     ```
     Thực hiện theo commands\spark.txt
     ```  
-### Yêu Cầu
-#### Docker
-#### NodeJS
-#### Python
+
 
 
