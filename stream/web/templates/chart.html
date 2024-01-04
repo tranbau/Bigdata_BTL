@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kafka messages</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js" integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA==" crossorigin="anonymous"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+</head>
+<body>
+    <div id="chart-container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Tạo biểu đồ Highcharts
+            var chart = Highcharts.chart('chart-container', {
+                title: {
+                    text: 'Kafka Data Visualization'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    title: {
+                        text: 'Date'
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Close close'
+                    }
+                },
+                series: [{
+                    name: 'Close close',
+                    data: [] 
+                }]
+            });
+
+            // Tạo kết nối socket với server Flask
+            const socket = io.connect('http://localhost:5000/kafka');
+
+            socket.on("connect", () => {
+                console.log("Connected")
+            })
+            // Lắng nghe sự kiện 'kafka_message' từ server
+            socket.on('kafka_message', function (message) {
+                console.log(message)
+                const data = JSON.parse(message);
+                // Kiểm tra nếu dữ liệu là đúng định dạng
+                if (data.date && data.close !== undefined) {
+                    // Chuyển đổi ngày thành milliseconds (Epoch time) để sử dụng cho trục x
+                    const dateInMilliseconds = (new Date(data.date)).getTime();
+                    // Thêm dữ liệu vào biểu đồ
+                    chart.series[0].addPoint([dateInMilliseconds, data.close]);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

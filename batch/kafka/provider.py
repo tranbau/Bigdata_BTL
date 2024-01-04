@@ -15,7 +15,6 @@ csv_file_path = os.path.join(script_dir, 'data.csv')
 
 # Read the CSV file using pandas
 df = pd.read_csv(csv_file_path)
-
 producer = Producer({'bootstrap.servers': 'localhost:8097'})
 
 def delivery_callback(err, msg):
@@ -24,13 +23,13 @@ def delivery_callback(err, msg):
     else:
         sys.stderr.write('%% Message delivered to %s [%d] @ %d\n' %
                              (msg.topic(), msg.partition(), msg.offset()))
-        
 try:
     for index, row in df.iterrows():
         dict_stock = row.to_dict()
+        dict_stock["name"] = "google"
         json_data = json.dumps(dict_stock).encode("utf-8")
         producer.produce(topic, value = json_data,callback = delivery_callback )
-        sleep(1)
+        sleep(5)
         producer.poll(0)
 
 except KeyboardInterrupt:

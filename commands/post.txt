@@ -1,1 +1,12 @@
 docker exec -it postgres psql -U user -W stock
+
+CREATE TABLE stock_data (
+    id SERIAL PRIMARY KEY,
+    date DATE,
+    open NUMERIC(10, 6),
+    high NUMERIC(10, 6),
+    low NUMERIC(10, 6),
+    close NUMERIC(10, 6),
+    adjClose NUMERIC(10, 6),
+    volume INT
+);

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kafka messages</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body>div {
+            width: 80vw;
+            margin: auto;
+        }
+
+        #myChart {
+            width: 100% !important;
+            height: 500px !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="config">
+        <h3>Tùy chỉnh</h3>
+        <input id="priceConfig" type="number" placeholder="Nhập mức giá" />
+        <button id="submit">Lưu</button>
+    </div>
+
+    <div>
+        <h3>Ngưỡng giá thông báo hiện tại: <span id="current-config"></span></h3>
+    </div>
+
+    <div id=" chart">
+        <h3>Biểu đồ giá</h3>
+        <canvas id="myChart"></canvas>
+    </div>
+
+
+    <script>
+        $(document).ready(function () {
+            let currentPriceConfig;
+            let ws;
+            const buttonSutmitEle = document.getElementById("submit")
+            const inputConfigEle = document.getElementById("priceConfig")
+            const currentPriceConfigEle = document.getElementById("current-config")
+
+
+            // Chart config
+            let data = {
+                labels: [],
+                datasets: [{
+                    label: "Giá đóng cửa từ Kafka",
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    data: []
+                }]
+            };
+            let ctx = document.getElementById("myChart")
+            let config = {
+                type: 'line',
+                data: data,
+                responsive: true,
+                options: {
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Ngày'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Giá'
+                            },
+                            ticks: {
+                                precision: 6
+                            }
+                        }
+                    }
+                }
+            };
+            let chart = new Chart(ctx, config);
+
+            const updateData = function (oldVal, newVal) {
+                // Lấy giá trị price và date từ receivedData
+                const newClosePrice = newVal.close;
+                const newDate = newVal.date;
+
+                // Gía trị cũ
+                let oldLabels = oldVal["labels"];
+                let oldDataset = oldVal["datasets"][0]["data"];
+
+                // Cập nhập
+                oldLabels.push(newDate);
+                oldDataset.push(newClosePrice);
+
+                chart.update();
+            };
+
+            const onSubmitConfig = () => {
+                const priceConfig = inputConfigEle.value
+                ws.send(parseFloat(priceConfig))
+                currentPriceConfigEle.textContent = priceConfig
+            }
+            buttonSutmitEle.addEventListener("click", onSubmitConfig)
+
+            function webSocketInvoke() {
+                if ("WebSocket" in window) {
+                    console.log("WebSocket is supported by your Browser!");
+                    ws = new WebSocket("ws://localhost:8888/", "echo-protocol");
+
+                    ws.onopen = function () {
+                        console.log("Connection created");
+                    };
+
+                    ws.onmessage = function (evt) {
+                        const received_msg = evt.data;
+                        const receivedData = JSON.parse(received_msg);
+                        updateData(data, receivedData)
+                        console.log(receivedData);
+                    };
+
+                    ws.onconfig = function (evt) {
+                        const received_msg = evt.data;
+                        const receivedData = JSON.parse(received_msg);
+                    }
+
+                    ws.onclose = function () {
+                        console.log("Connection closed");
+                    };
+                } else {
+                    alert("WebSocket NOT supported by your Browser!");
+                }
+            }
+            webSocketInvoke();
+        });
+    </script>
+
+</body>
+
+</html>

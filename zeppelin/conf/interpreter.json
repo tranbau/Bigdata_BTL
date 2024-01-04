@@ -1068,7 +1068,7 @@
         },
         "spark.jars.packages": {
           "name": "spark.jars.packages",
-          "value": "",
+          "value": "org.postgresql:postgresql:42.7.1",
           "type": "string",
           "description": "Comma-separated list of Maven coordinates of jars to include on the driver and executor classpaths. The coordinates should be groupId:artifactId:version. If spark.jars.ivySettings is given artifacts will be resolved according to the configuration in the file, otherwise artifacts will be searched for in the local maven repo, then maven central and finally any additional remote repositories given by the command-line option --repositories."
         },
@@ -1216,7 +1216,7 @@
           "type": "textarea"
         }
       },
-      "status": "DOWNLOADING_DEPENDENCIES",
+      "status": "READY",
       "interpreterGroup": [
         {
           "name": "spark",
@@ -1307,12 +1307,7 @@
           }
         }
       ],
-      "dependencies": [
-        {
-          "groupArtifactVersion": "/opt/zeppelin/interpreter/spark/dep/postgresql-42.7.1.jar",
-          "local": false
-        }
-      ],
+      "dependencies": [],
       "option": {
         "remote": true,
         "port": -1,

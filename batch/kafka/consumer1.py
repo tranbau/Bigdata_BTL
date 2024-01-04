@@ -3,17 +3,11 @@ import pandas as pd
 import sys
 import json
 from cassandra.cluster import Cluster
+import psycopg2
 
-# Cassandra connect 
-cluster = Cluster(['localhost'], port=9042)  # Replace with your Cassandra node IP
-session = cluster.connect('stock_data')  # Replace 'stock_data' with your keyspace name
-query = """
-        INSERT INTO stock_prices (date, open, high, low, close, adj_close, volume)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """
-
-# Mongo connnect
-
+# DB connection
+conn = psycopg2.connect( database="stock", user='user', password='password', host='127.0.0.1', port= '5432')
+cursor = conn.cursor()
  
 def msg_process(msg):
     record = json.loads(msg.value())
@@ -24,9 +18,22 @@ def msg_process(msg):
         "offset": msg.offset(),
         "timestamp": msg.timestamp()
     }
-    # store data to cassandra
-    session.execute(query, (record['date'], record['open'], record['high'], record['low'],
-                                     record['close'], record['adjClose'], record['volume']))
+    # store data to DB
+    insert_query = "INSERT INTO stock_data (date, open, high, low, close,adjClose, volume) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    
+    # Extracting values from the record
+    date = record.get('date')
+    open = record.get('open')
+    high = record.get('high')
+    low = record.get('low')
+    close = record.get('close')
+    ajdClose = record.get("adjClose")
+    volume = record.get("volume")
+    
+    # Insert data into the table
+    cursor.execute(insert_query, (date, open,high,low, close, ajdClose, volume))
+    conn.commit()
+
     print("Consumer1", metadata, end='\n')
 
 
@@ -81,6 +88,7 @@ def syn_commit_consume(consumer, topics):
         sys.stderr.write('%% Aborted by user\n')
     finally:
         consumer.close()
+        conn.close()
         
 def commit_completed(err, partitions):
     if err:
@@ -111,7 +119,6 @@ def asyn_commit_consume(consumer, topics):
                 if msg_count % MIN_COMMIT_COUNT == 0:
                     consumer.commit(asynchronous=True)
     except KeyboardInterrupt:
-        
         sys.stderr.write('%% Aborted by user\n')
     finally:
         consumer.close()
@@ -124,6 +131,12 @@ if __name__ == '__main__':
         'auto.offset.reset': 'earliest',
         'enable.auto.commit': True,
     }    
+    try:
+        consumer = Consumer(config)
+        auto_commit_consume(consumer=consumer, topics=topics)
+    except Exception as e:
+        print("Error:", e)
+    
     # To handle with asyn commit
     # config = {
     #     'bootstrap.servers': 'localhost:8097',
@@ -132,9 +145,3 @@ if __name__ == '__main__':
     #     'enable.auto.commit': False,
     #     'on_commit': commit_completed
     # }
-    try:
-        consumer = Consumer(config)
-        auto_commit_consume(consumer=consumer, topics=topics)
-    except Exception as e:
-        print("Error:", e)
-    
