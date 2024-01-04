@@ -32,6 +32,7 @@ data_stream = spark \
     .option("failOnDataLoss", "false")\
     .load() \
     .selectExpr("cast(value as string) as value")
+    
 data_schema = StructType([
     StructField("date", TimestampType(), True),
     StructField("open", DoubleType(), True),

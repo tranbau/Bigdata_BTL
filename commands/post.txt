@@ -10,3 +10,6 @@ CREATE TABLE stock_data (
     adjClose NUMERIC(10, 6),
     volume INT
 );
+
+1. Delete from stock_data 
+2. Docker inspect postgres -> tìm IP -> thay đổi vào spark-batch

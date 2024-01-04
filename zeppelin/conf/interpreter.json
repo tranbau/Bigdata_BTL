@@ -1307,7 +1307,17 @@
           }
         }
       ],
-      "dependencies": [],
+      "dependencies": [
+        {
+          "groupArtifactVersion": "/opt/zeppelin/interpreter/spark/dep/packages/checker-qual-3.41.0.jar",
+          "local": false
+        },
+        {
+          "groupArtifactVersion": "/opt/zeppelin/interpreter/spark/dep/packages/postgresql-42.7.1.jar",
+          "local": false,
+          "exclusions": []
+        }
+      ],
       "option": {
         "remote": true,
         "port": -1,

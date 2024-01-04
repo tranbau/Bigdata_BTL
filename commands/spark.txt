@@ -1,12 +1,7 @@
 1.
-docker exec -it spark-master /bin/bash
-pip install requests
-
-2.
 docker cp .\spark-streaming.py spark-master:spark-streaming.py
 
-3.
+2.
 docker logs spark-master 
 -> tìm ~ spark://172.18.0.2:7077
-docker-compose exec spark-master /spark/bin/spark-submit --master spark://f5e0d3014aba:7077 --packages 
-org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 ../../spark-streaming.py
+docker-compose exec spark-master /spark/bin/spark-submit --master spark://a8f885f59193:7077 --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 ../../spark-streaming.py
